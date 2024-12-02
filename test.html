@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aircraft Task Scraper</title>
+</head>
+<body>
+    <h2>Aircraft Task Scraper Form</h2>
+
+    <!-- Form to submit data -->
+    <form action="http://127.0.0.1:5000/submit" method="POST">
+        <!-- Username input -->
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <!-- Password input -->
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <!-- Fleet type dropdown -->
+        <label for="fleet_type">Fleet Type:</label>
+        <select id="fleet_type" name="fleet_type" required>
+            {% for fleet in fleet_types %}
+            <option value="{{ fleet }}">{{ fleet }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <!-- Tail numbers input (multiple can be added) -->
+        <label for="tail">Tail Numbers (comma-separated):</label>
+        <input type="text" id="tail" name="tail" placeholder="Enter tail numbers separated by commas" required><br><br>
+
+        <!-- Submit button -->
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

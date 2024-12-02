@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overdue Task Extracter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button, input[type="submit"] {
+            padding: 12px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 150px; /* Adjust the width as necessary */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="images/ifs-logo.jpg" alt="IFS Logo" class="logo">
+        <h1>Overdue Task Extracter</h1>
+        <h2>Select Fleet Type and Aircraft Tail</h2>
+
+        <!-- Form to submit data -->
+        <form action="http://127.0.0.1:5000/submit" method="POST">
+            <label for="fleetType">Fleet Type:</label>
+            <select id="fleetType" name="fleet_type" required onchange="updateTails()">
+                <option value="737-300/400/500">737-300/400/500</option>
+                <option value="AIRBUS A350-900">AIRBUS A350-900</option>
+                <option value="BOEING 737-700">BOEING 737-700</option>
+                <option value="BOEING 737-800">BOEING 737-800</option>
+                <option value="BOEING 737-8MAX">BOEING 737-8MAX</option>
+                <option value="BOEING 737-8MAX ASKY">BOEING 737-8MAX ASKY</option>
+                <option value="BOEING 767-300ERBDSF">BOEING 767-300ERBDSF</option>
+                <option value="BOEING 777-200/300 CUSTOMER">BOEING 777-200/300 CUSTOMER</option>
+                <option value="BOEING 777-200LR">BOEING 777-200LR</option>
+                <option value="BOEING 777-300ER">BOEING 777-300ER</option>
+                <option value="BOEING 777-3M2ER">BOEING 777-3M2ER</option>
+                <option value="BOEING 777-F6N">BOEING 777-F6N</option>
+                <option value="BOEING 787-8">BOEING 787-8</option>
+                <option value="BOEING 787-9">BOEING 787-9</option>
+                <option value="BOMBARDIER Q400-C">BOMBARDIER Q400-C</option>
+                <option value="BOMBARDIER Q400-DASH 8">BOMBARDIER Q400-DASH 8</option>
+                <option value="CESSNA 172S SKYHAWK">CESSNA 172S SKYHAWK</option>
+            </select>
+
+            <label for="aircraftTail">Aircraft Tail:</label>
+            <select id="aircraftTail" name="tail" required>
+                <option value="">Select a tail</option>
+                <!-- Tail options will be populated here -->
+            </select>
+
+            <h2>User Information</h2>
+            <label for="userName">Username:</label>
+            <input type="text" id="userName" name="username" placeholder="Enter your username" required>
+
+            <label for="userPassword">Password:</label>
+            <input type="password" id="userPassword" name="password" placeholder="Enter your password" required>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+		const fleetData = [
+         {"fleet_type": "737-300/400/500 ", "tail": "C5-BDA"},
+         {"fleet_type": "737-300/400/500 ", "tail": "C5-BDV"},
+         {"fleet_type": "737-300/400/500 ","tail": "ALL_TAILS"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-ATQ"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-ATR"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-ATY"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AUA"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AUB"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AUC"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AVB"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AVC"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AVD"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AVE"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AWM"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AWN"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AWO"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AWP"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AYA"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AYB"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AYM"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AYN"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AZI"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-AZN"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ET-BAW"},
+         {"fleet_type": "AIRBUS A350-900 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "5N-MJF"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "5N-MJH"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "D4-CCI"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "9J-ZAE"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ET-ALM"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ET-ALN"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ET-ANG"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ET-ANH"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ET-AVP"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "TJ-QCB"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "TN-AJI"},
+         {"fleet_type": "BOEING 737-700 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "5V-TTV"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-APF"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-APK"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-APL"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-APM"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-APO"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AQN"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AQO"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AQP"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AQQ"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-ASJ"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AVX"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AWC"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AWR"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AWS"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AXI"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AXO"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AYL"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AYP"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AYU"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AZY"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-AZZ"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-BAG"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ET-BAH"},
+         {"fleet_type": "BOEING 737-800 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AVI"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AVK"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AVL"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AVM"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWF"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWG"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWH"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWI"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWJ"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AWK"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AXG"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AZA"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-AZO"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-BAI"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-BAL"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-BAN"},
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ET-BAO"}, 
+         {"fleet_type": "BOEING 737-8MAX ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 737-8MAX ASKY ", "tail": "ET-BAQ"},
+         {"fleet_type": "BOEING 737-8MAX ASKY ", "tail": "ET-BAR"},
+         {"fleet_type": "BOEING 737-8MAX ASKY ", "tail": "ET-BAU"},
+         {"fleet_type": "BOEING 737-8MAX ASKY ", "tail": "ET-BAT"},
+         {"fleet_type": "BOEING 737-8MAX ASKY ",  "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 767-300ERBDSF ", "tail": "3C-MAG"},
+         {"fleet_type": "BOEING 767-300ERBDSF ", "tail": "ET-ALJ"},
+         {"fleet_type": "BOEING 767-300ERBDSF ", "tail": "ET-ALO"},
+         {"fleet_type": "BOEING 767-300ERBDSF ", "tail": "ET-ALP"},
+         {"fleet_type": "BOEING 767-300ERBDSF ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "5N-BVE"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "5N-BWI"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "D2-TEI."},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "HZ-AK18"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "HZ-AK19"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "HZ-AK20"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "HZ-AK23"},
+         {"fleet_type": "BOEING 777-200/300 CUSTOMER ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-ANN"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-ANO"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-ANP"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-ANQ"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-ANR"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ET-AQL"},
+         {"fleet_type": "BOEING 777-200LR ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 777-300ER ", "tail": "ET-APX"},
+         {"fleet_type": "BOEING 777-300ER ", "tail": "ET-APY"},
+         {"fleet_type": "BOEING 777-300ER ", "tail": "ET-ASK"},
+         {"fleet_type": "BOEING 777-300ER ", "tail": "ET-ASL"},
+         {"fleet_type": "BOEING 777-300ER ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TED"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEE"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEF"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEG"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEH"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEI"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEJ"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "D2-TEK"},
+         {"fleet_type": "BOEING 777-3M2ER ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-APS"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-APU"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-ARH"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-ARI"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-ARJ"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-ARK"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-AVN"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-AVQ"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-AVT"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-AWE"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-BAA"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ET-BAB"},
+         {"fleet_type": "BOEING 777-F6N ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOO"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOP"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOQ"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOR"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOS"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOT"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOU"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-AOV"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ARE"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ARF"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ASG"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ASH"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ASI"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATG"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATH"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATI"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATJ"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATK"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ET-ATL"},
+         {"fleet_type": "BOEING 787-8 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AUO"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AUP"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AUQ"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AUR"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AXK"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AXL"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AXS"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AXT"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AYC"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ET-AYD"},
+         {"fleet_type": "BOEING 787-9 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOMBARDIER Q400-C ", "tail": "ET-AZV"},
+         {"fleet_type": "BOMBARDIER Q400-C ", "tail": "TJ-QDD"},
+         {"fleet_type": "BOMBARDIER Q400-C ", "tail": "TJ-QDF"},
+         {"fleet_type": "BOMBARDIER Q400-C ", "tail": "ALL_TAILS"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "9J-ZAW"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANI"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANJ"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANK"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANL"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANV"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ANX"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AQB"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AQC"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AQD"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AQE"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AQF"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ARL"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ARM"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ARN"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-ASA"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AUD"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AUE"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AUZ"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AVA"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AVH"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AVR"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AVS"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXE"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXF"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXP"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXW"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXX"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXY"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AXZ"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AYF"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AYG"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ET-AYH"},
+         {"fleet_type": "BOMBARDIER Q400-DASH 8 ", "tail": "ALL_TAILS"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-AQY"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASP"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASQ"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASR"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASS"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-AST"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASU"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ET-ASV"},
+         {"fleet_type": "CESSNA 172S SKYHAWK ", "tail": "ALL_TAILS"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AOH"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AOI"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AOJ"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AOY"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-APA"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-APB"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-APC"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-APD"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AUH"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AUI"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AUJ"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AWT"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AWU"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AWV"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AWW"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AWZ"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AXA"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AXB"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AXC"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AXD"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AZC"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AZD"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AZE"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AZF"},
+         {"fleet_type": "DA40NG DIAMOND AIRCRAFT ", "tail": "ET-AZH"},
+         {"fleet_type": "DA42NG DIAMOND AIRCRAFT ", "tail": "ET-APG"},
+         {"fleet_type": "DA42NG DIAMOND AIRCRAFT ", "tail": "ET-APH"},
+         {"fleet_type": "DA42NG DIAMOND AIRCRAFT ", "tail": "ET-AWA"},
+         {"fleet_type": "DA42NG DIAMOND AIRCRAFT ", "tail": "ET-AWB"},
+         {"fleet_type": "DA42NG DIAMOND AIRCRAFT ", "tail": "ALL_TAILS"},
+         {"fleet_type": "DHC Q400-8-400 DORNIER ", "tail": "5N-CCS"},
+         {"fleet_type": "DHC Q400-8-400 DORNIER ", "tail": "ALL_TAILS"},
+         {"fleet_type": "F-50 ", "tail": "ET-AYZ"}
+		];
+
+        function updateTails() {
+            const fleetType = document.getElementById('fleetType').value;
+            const aircraftTail = document.getElementById('aircraftTail');
+            aircraftTail.innerHTML = '<option value="">Select a tail</option>';
+            fleetData.forEach(item => {
+                if (item.fleet_type.trim() === fleetType) {
+                    const option = document.createElement('option');
+                    option.value = item.tail;
+                    option.textContent = item.tail;
+                    aircraftTail.appendChild(option);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
